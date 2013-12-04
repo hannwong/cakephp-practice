@@ -1,0 +1,46 @@
+# User specific & automatically generated files #
+#################################################
+/tmp
+/lib/Cake/Console/Templates/skel/tmp/
+
+# Files I don't touch. (Using original CakePHP source)
+######################################################
+/.htaccess
+/Config/Schema/
+/Config/acl.ini.php
+/Config/acl.php
+/Config/database.php.default
+/Config/email.php.default
+/Console/
+/Controller/PagesController.php
+/Controller/Component/empty
+/Lib/
+/Locale/
+/Model/Behavior/empty
+/Model/Datasource/empty
+/Plugin/
+/Test/Case/Controller/Component/empty
+/Test/Case/Model/Behavior/empty
+/Test/Case/View/Helper/empty
+/Test/Fixture/empty
+/Vendor/
+/View/Elements/
+/View/Emails/
+/View/Errors/
+/View/Helper/
+/View/Layouts/
+/View/Pages/
+/View/Scaffolds/
+/webroot/
+/index.php
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
