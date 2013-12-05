@@ -52,7 +52,7 @@ class NoteFoldersController extends AppController {
 		$result = $this->NoteFolder->find('first', $options);
 
 		if (!$this->_aclCheck($result['NoteFolder']['id'], 'read'))
-			throw new NotFoundException(__('Invalid note folder'));
+			throw new NotFoundException(__('Invalid folder'));
 
 		$this->set('noteFolder', $result);
 	}
@@ -60,24 +60,36 @@ class NoteFoldersController extends AppController {
 /**
  * add method
  *
- * TODO: Acl check. Also limit the options for parent NoteFolder according to Acl checks.
  * @return void
  */
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->NoteFolder->create();
+
+			// Check User's 'create' permission on folder.
+			if (!$this->_aclCheckFolder($this->request->data['NoteFolder']['note_folder_id'], 'create'))
+				throw new NotFoundException(__('Invalid folder'));
+			// Check folder's owner. Only 'administrators' Group can create folders with any owner.
+			if ($this->request->data['NoteFolder']['user_id'] != $this->Auth->user('id') &&
+			    !$this->_isInGroup(1))
+				throw new NotFoundException(__('Invalid folder'));
+
 			if ($this->NoteFolder->save($this->request->data)) {
-				$this->Session->setFlash(__('The note folder has been saved.'));
+				$this->Session->setFlash(__('The folder has been saved.'));
 
 				$this->_setDefaultPermissions($this->request->data);
 
 				return $this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The note folder could not be saved. Please, try again.'));
+				$this->Session->setFlash(__('The folder could not be saved. Please, try again.'));
 			}
 		}
-		$noteFolders = $this->NoteFolder->ParentNoteFolder->find('list');
-		$users = $this->NoteFolder->User->find('list');
+
+		// Only display folders that our User has 'create' permissions on.
+		$noteFolders = $this->_getAllowedFoldersList('create');
+		// Only display users that our User can assign as owners for Notes.
+		$users = $this->_getAllowedOwnersList();
+
 		$this->set(compact('users', 'noteFolders'));
 	}
 
@@ -90,36 +102,55 @@ class NoteFoldersController extends AppController {
  */
 	public function edit($id = null) {
 		if (!$this->NoteFolder->exists($id)) {
-			throw new NotFoundException(__('Invalid note folder'));
+			throw new NotFoundException(__('Invalid folder'));
 		}
 		if (!$this->_aclCheck($id, 'update'))
-			throw new NotFoundException(__('Invalid note folder'));
+			throw new NotFoundException(__('Invalid folder'));
 		if ($this->request->is(array('post', 'put'))) {
+			// Have update permission on the folder?
 			if (!$this->_aclCheck($this->request->data['NoteFolder']['id'], 'update'))
 				throw new NotFoundException(__('Invalid note folder'));
 
+			// Check User's 'create' permission on folder.
+			// TODO: If parent folder hasn't changed, allow folder edit.
+			//   If it has changed, check 'create' permission for target folder.
+			if (!$this->_aclCheckFolder($this->request->data['NoteFolder']['note_folder_id'], 'create'))
+				throw new NotFoundException(__('Invalid folder'));
+
+			// Check folder's owner. Only 'administrators' Group can create folders with any owner.
+			if ($this->request->data['NoteFolder']['user_id'] != $this->Auth->user('id') &&
+			    !$this->_isInGroup(1))
+				throw new NotFoundException(__('Invalid folder'));
+
 			// Get old owner. Need to remove permissions if ownership has changed.
-			$user = $this->NoteFolder->User->findById($this->Note->User->id);
+			$this->NoteFolder->id = $id; $this->NoteFolder->read();
+			$oldUserId = $this->NoteFolder->data['User']['id'];
 
 			if ($this->NoteFolder->save($this->request->data)) {
-				$this->Session->setFlash(__('The note folder has been saved.'));
+				$this->Session->setFlash(__('The folder has been saved.'));
 
-				if ($this->NoteFolder->user_id != $user['id']) {
-					// TODO: Set permissions to inherit.
+				if (intval($this->request->data['NoteFolder']['user_id']) != $oldUserId) {
+					// Onwership has changed!
+					// Set permissions to inherit ("remove" explicit permissions)
+					$this->_removeDefaultPermissions($oldUserId);
 				}
 
-				$this->_setDefaultPermissions();
+				$this->_setDefaultPermissions($this->request->data);
 
 				return $this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The note folder could not be saved. Please, try again.'));
+				$this->Session->setFlash(__('The folder could not be saved. Please, try again.'));
 			}
 		} else {
 			$options = array('conditions' => array('NoteFolder.' . $this->NoteFolder->primaryKey => $id));
 			$this->request->data = $this->NoteFolder->find('first', $options);
 		}
-		$noteFolders = $this->NoteFolder->ParentNoteFolder->find('list');
-		$users = $this->NoteFolder->User->find('list');
+
+		// Only display folders that our User has 'create' permissions on.
+		$noteFolders = $this->_getAllowedFoldersList('create');
+		// Only display users that our User can assign as owners for Notes.
+		$users = $this->_getAllowedOwnersList();
+
 		$this->set(compact('users', 'noteFolders'));
 	}
 
@@ -133,17 +164,17 @@ class NoteFoldersController extends AppController {
 	public function delete($id = null) {
 		$this->NoteFolder->id = $id;
 		if (!$this->NoteFolder->exists()) {
-			throw new NotFoundException(__('Invalid note folder'));
+			throw new NotFoundException(__('Invalid folder'));
 		}
 		$this->request->onlyAllow('post', 'delete');
 		if (!$this->_aclCheck($id, 'delete'))
-			throw new NotFoundException(__('Invalid note folder'));
+			throw new NotFoundException(__('Invalid folder'));
 
 		if ($this->NoteFolder->delete()) {
-			$this->Session->setFlash(__('The note folder has been deleted.'));
+			$this->Session->setFlash(__('The folder has been deleted.'));
 			// Acl tables automatically handled.
 		} else {
-			$this->Session->setFlash(__('The note folder could not be deleted. Please, try again.'));
+			$this->Session->setFlash(__('The folder could not be deleted. Please, try again.'));
 		}
 		return $this->redirect(array('action' => 'index'));
 	}
@@ -171,6 +202,19 @@ class NoteFoldersController extends AppController {
 	}
 
 /**
+ * Effectively the inverse of _setDefaultPermissions(). Setting value to 'inherit'.
+ *
+ * @param integer $userId Old user ID. Note should have a new owner now.
+ */
+	public function _removeDefaultPermissions($userId) {
+		$folderId = $this->NoteFolder->id;
+
+		// "Remove" user permissions.
+		$result = $this->Acl->inherit(array('User' => array('id' => $userId)),
+					      array('NoteFolder' => array('id' => $folderId)));
+	}
+
+/**
  * Acl check. ARO is the logged in User.
  *
  * @param string $id ID of NoteFolder (the ACO).
@@ -191,6 +235,67 @@ class NoteFoldersController extends AppController {
 	}
 	public function _inheritGroupPermissions($groupId, $action = '*') {
 		$this->Acl->inherit(array('Group' => array('id' => $groupId)), $this->NoteFolder, $action);
+	}
+
+/**
+ * Checks if the logged in user is in a Group.
+ * @param integer $groupId The group membership to check for.
+ */
+	public function _isInGroup($groupId) {
+		$this->NoteFolder->User->id = $this->Auth->user('id'); $this->NoteFolder->User->read();
+		foreach ($this->NoteFolder->User->data['GroupMember'] as $membership) {
+			if ($membership['group_id'] == $groupId)
+				return true;
+		}
+		return false;
+	}
+
+/**
+ * Acl check on NoteFolder. ARO is the logged in User.
+ *
+ * @param string $id ID of NoteFolder (the ACO).
+ * @param string $action permission key to check for (*, create, read, update, delete).
+ * @return boolean Success
+ */
+	public function _aclCheckFolder($id = null, $action = '*') {
+		if (empty($id)) return false;
+		return $this->Acl->check(array('User' => array('id' => $this->Auth->user('id'))),
+					 array('NoteFolder' => array('id' => $id), $action));
+	}
+
+/**
+ * Returns an array folders that our User has 'create' permissions on. In 'list' format.
+ *
+ * @param string $action Action for which to check for permission.
+ */
+	public function _getAllowedFoldersList($action = '*') {
+		$temp = $this->NoteFolder->ParentNoteFolder->find('all', array('fields' => array('id', 'name'), 'recursive' => -1));
+		$noteFolders = array();
+		foreach ($temp as $folder) {
+			if ($this->_aclCheckFolder($folder['ParentNoteFolder']['id'], $action))
+				array_push($noteFolders, array('ParentNoteFolder.id' => $folder['ParentNoteFolder']['id']));
+		}
+		$noteFolders = $this->NoteFolder->ParentNoteFolder->find('list', array('conditions' => array('OR' => $noteFolders)));
+		return $noteFolders;
+	}
+
+/**
+ * Returns an array of users for which our User can assign as owner for folders. In 'list' format.
+ *
+ * TODO: Create a set of ACOs for Groups/Users so that we can set permissions on creating folders for users
+ *   other than our logged in User.
+ * For now, hardcode these permissions here:
+ *  Only Group 'administrators' can create folders with any user as owner. Nobody else can
+ *  masquerade anybody else, or spam new folders with any arbitrary owner.
+ */
+	public function _getAllowedOwnersList() {
+		$users = null;
+		if ($this->_isInGroup(1))
+			$users = $this->NoteFolder->User->find('list');
+		else
+			$users = $this->NoteFolder->User->find('list',
+				 array('conditions' => array('User.id' => $this->Auth->user('id'))));
+		return $users;
 	}
 
 }

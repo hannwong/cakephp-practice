@@ -62,8 +62,6 @@ class NotesController extends AppController {
 /**
  * add method
  *
- * TODO: Perform Acl checks for this? Disable this action, and put in in NoteFoldersController?
- *
  * @return void
  */
 	public function add() {
