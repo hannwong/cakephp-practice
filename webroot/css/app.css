@@ -1,0 +1,10 @@
+@charset "utf-8";
+
+div.cakepowered {
+	float:left;
+	width:50%;
+}
+div.userinfo {
+	float:right;
+	width:50%;
+}

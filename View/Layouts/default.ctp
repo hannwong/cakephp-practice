@@ -31,6 +31,7 @@ $cakeDescription = __d('cake_dev', 'CakePHP: the rapid development php framework
 		echo $this->Html->meta('icon');
 
 		echo $this->Html->css('cake.generic');
+		echo $this->Html->css('app');
 
 		echo $this->fetch('meta');
 		echo $this->fetch('css');
@@ -40,7 +41,10 @@ $cakeDescription = __d('cake_dev', 'CakePHP: the rapid development php framework
 <body>
 	<div id="container">
 		<div id="header">
-			<h1><?php echo $this->Html->link($cakeDescription, 'http://cakephp.org'); ?></h1>
+			<div class="cakepowered"><h1><?php echo $this->Html->link($cakeDescription, 'http://cakephp.org'); ?></h1></div>
+			<div class="userinfo"><?php if (AuthComponent::user()) {
+							echo "Welcome, ".AuthComponent::user('username')."&nbsp;&nbsp;&nbsp;";
+							echo $this->Html->link("Logout", '/users/logout'); } ?></div>
 		</div>
 		<div id="content">
 

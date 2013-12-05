@@ -28,11 +28,14 @@
 /View/Emails/
 /View/Errors/
 /View/Helper/
-/View/Layouts/*
+/View/Layouts/
 !/View/Layouts/default.ctp
 /View/Pages/
 /View/Scaffolds/
-/webroot/
+/webroot/*
+!/webroot/css/
+/webroot/css/*
+!/webroot/css/app.css
 /index.php
 
 # OS generated files #
