@@ -306,18 +306,30 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 
 		echo "Set permissions for Group 'administrators'.\n";
 
-		// Allow managers to notes.
+		// Allow managers to delete users and groups.
 		$Group->id = $data['Group']['managers']['id'];
 		$RbAcl->deny($Group, $rootNodeAlias);
+		// Only administrators can delete Users.
+		$RbAcl->allow($Group, $rootNodeAlias . '/Users/index');
+		$RbAcl->allow($Group, $rootNodeAlias . '/Users/add');
+		$RbAcl->allow($Group, $rootNodeAlias . '/Users/view');
+		$RbAcl->allow($Group, $rootNodeAlias . '/Users/edit');
+		// Allow managers full CRUD on Groups, Notes and NoteFolders.
+		$RbAcl->allow($Group, $rootNodeAlias . '/Groups');
 		$RbAcl->allow($Group, $rootNodeAlias . '/Notes');
+		$RbAcl->allow($Group, $rootNodeAlias . '/NoteFolders');
 
 		echo "Set permissions for Group 'managers'.\n";
 
-		// Allow users to only add and edit on notes.
 		$Group->id = $data['Group']['users']['id'];
 		$RbAcl->deny($Group, $rootNodeAlias);
-		$RbAcl->allow($Group, $rootNodeAlias . '/Notes/add');
-		$RbAcl->allow($Group, $rootNodeAlias . '/Notes/edit');
+		// Allow users full CRUD on Notes and NoteFolders.
+		$RbAcl->allow($Group, $rootNodeAlias . '/Notes');
+		$RbAcl->allow($Group, $rootNodeAlias . '/NoteFolders');
+		// Allow users to only view/edit Users (controller restricts that to own user account)
+		$RbAcl->allow($Group, $rootNodeAlias . '/Users/view');
+		$RbAcl->allow($Group, $rootNodeAlias . '/Users/edit');
+		// Deny users from CRUD on Group. Leave that to managers.
 
 		echo "Set permissions for Group 'users'.\n";
 	}
