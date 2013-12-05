@@ -59,6 +59,8 @@ class GroupsController extends AppController {
 				$this->Session->setFlash(__('The group could not be saved. Please, try again.'));
 			}
 		}
+		$users = $this->Group->User->find('list');
+		$this->set(compact('users'));
 	}
 
 /**
@@ -83,6 +85,8 @@ class GroupsController extends AppController {
 			$options = array('conditions' => array('Group.' . $this->Group->primaryKey => $id));
 			$this->request->data = $this->Group->find('first', $options);
 		}
+		$users = $this->Group->User->find('list');
+		$this->set(compact('users'));
 	}
 
 /**

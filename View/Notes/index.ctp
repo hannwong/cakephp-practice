@@ -3,10 +3,10 @@
 	<table cellpadding="0" cellspacing="0">
 	<tr>
 			<th><?php echo $this->Paginator->sort('id'); ?></th>
-			<th><?php echo $this->Paginator->sort('user_id'); ?></th>
 			<th><?php echo $this->Paginator->sort('title'); ?></th>
 			<th><?php echo $this->Paginator->sort('body'); ?></th>
-			<th><?php echo $this->Paginator->sort('folder_id'); ?></th>
+			<th><?php echo $this->Paginator->sort('note_folder_id', 'Folder'); ?></th>
+			<th><?php echo $this->Paginator->sort('user_id', 'Owner'); ?></th>
 			<th><?php echo $this->Paginator->sort('created'); ?></th>
 			<th><?php echo $this->Paginator->sort('modified'); ?></th>
 			<th class="actions"><?php echo __('Actions'); ?></th>
@@ -14,13 +14,13 @@
 	<?php foreach ($notes as $note): ?>
 	<tr>
 		<td><?php echo h($note['Note']['id']); ?>&nbsp;</td>
-		<td>
-			<?php echo $this->Html->link($note['User']['id'], array('controller' => 'users', 'action' => 'view', $note['User']['id'])); ?>
-		</td>
 		<td><?php echo h($note['Note']['title']); ?>&nbsp;</td>
 		<td><?php echo h($note['Note']['body']); ?>&nbsp;</td>
 		<td>
 			<?php echo $this->Html->link($note['NoteFolder']['name'], array('controller' => 'note_folders', 'action' => 'view', $note['NoteFolder']['id'])); ?>
+		</td>
+		<td>
+			<?php echo $this->Html->link($note['User']['username'], array('controller' => 'users', 'action' => 'view', $note['User']['id'])); ?>
 		</td>
 		<td><?php echo h($note['Note']['created']); ?>&nbsp;</td>
 		<td><?php echo h($note['Note']['modified']); ?>&nbsp;</td>
@@ -50,9 +50,13 @@
 	<h3><?php echo __('Actions'); ?></h3>
 	<ul>
 		<li><?php echo $this->Html->link(__('New Note'), array('action' => 'add')); ?></li>
-		<li><?php echo $this->Html->link(__('List Users'), array('controller' => 'users', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Owner'), array('controller' => 'users', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Note Folders'), array('controller' => 'note_folders', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Note Folder'), array('controller' => 'note_folders', 'action' => 'add')); ?> </li>
 	</ul>
+	<div class="top-level-menu">
+	<p>Top-level Menu</p>
+	<ul>
+		<li><?php echo $this->Html->link(__('List Folders'), array('controller' => 'note_folders', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Users'), array('controller' => 'users', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Groups'), array('controller' => 'groups', 'action' => 'index')); ?> </li>
+	</ul>
+	</div>
 </div>

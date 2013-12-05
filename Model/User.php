@@ -11,6 +11,8 @@ class User extends AppModel {
 
 	public $actsAs = array('Acl' => array('type' => 'requester'));
 
+	public $displayField = 'username';
+
 /**
  * All User(s) are listed under this root ARO. Permissions are defined on these "User" nodes.
  *

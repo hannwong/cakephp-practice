@@ -72,7 +72,7 @@ class NotesController extends AppController {
 			if ($this->Note->save($this->request->data)) {
 				$this->Session->setFlash(__('The note has been saved.'));
 
-				$this->_setDefaultPermissions();
+				$this->_setDefaultPermissions($this->request->data);
 
 				return $this->redirect(array('action' => 'index'));
 			} else {
@@ -156,13 +156,24 @@ class NotesController extends AppController {
 
 /**
  * Sets default permissions for thie Note (allow CRUD by default)
- * Expects $this->Note->User to be set.
+ * Expects $this->Note->id to be set.
+ *
+ * @param array $data $data['NoteFolder']['user_id'] must contain the owner.
  */
-	public function _setDefaultPermissions() {
-		$this->Note->User->id = $this->Note->data['User']['id'];
+	public function _setDefaultPermissions($data = null) {
+		$userId = null;
+		$noteId = $this->Note->id;
+		// Assume $this->Note->read() was done with valid $this->Note->id.
+		if (empty($data)) {
+			$userId = $this->Note->User->data['User']['id'];
+		}
+		else {
+			$userId = $data['Note']['user_id'];
+		}
 
-		// Allow CRUD permissions for owner.
-		$this->Acl->allow($this->Note->User, $this->Note);
+		// Allow user permissions.
+		$this->Acl->allow(array('User' => array('id' => $userId)),
+				  array('Note' => array('id' => $noteId)));
 	}
 
 /**

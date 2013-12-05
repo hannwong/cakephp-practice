@@ -1,5 +1,5 @@
 <div class="noteFolders view">
-<h2><?php echo __('Note Folder'); ?></h2>
+<h2><?php echo __('Folder'); ?></h2>
 	<dl>
 		<dt><?php echo __('Id'); ?></dt>
 		<dd>
@@ -11,14 +11,14 @@
 			<?php echo h($noteFolder['NoteFolder']['name']); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('Parent Note Folder'); ?></dt>
+		<dt><?php echo __('Parent Folder'); ?></dt>
 		<dd>
 			<?php echo $this->Html->link($noteFolder['ParentNoteFolder']['name'], array('controller' => 'note_folders', 'action' => 'view', $noteFolder['ParentNoteFolder']['id'])); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('User'); ?></dt>
+		<dt><?php echo __('Owner'); ?></dt>
 		<dd>
-			<?php echo $this->Html->link($noteFolder['User']['id'], array('controller' => 'users', 'action' => 'view', $noteFolder['User']['id'])); ?>
+			<?php echo $this->Html->link($noteFolder['User']['username'], array('controller' => 'users', 'action' => 'view', $noteFolder['User']['id'])); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Created'); ?></dt>
@@ -36,16 +36,10 @@
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>
 	<ul>
-		<li><?php echo $this->Html->link(__('Edit Note Folder'), array('action' => 'edit', $noteFolder['NoteFolder']['id'])); ?> </li>
-		<li><?php echo $this->Form->postLink(__('Delete Note Folder'), array('action' => 'delete', $noteFolder['NoteFolder']['id']), null, __('Are you sure you want to delete # %s?', $noteFolder['NoteFolder']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('List Note Folders'), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Note Folder'), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Note Folders'), array('controller' => 'note_folders', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Parent Note Folder'), array('controller' => 'note_folders', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Users'), array('controller' => 'users', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New User'), array('controller' => 'users', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Notes'), array('controller' => 'notes', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Note'), array('controller' => 'notes', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('Back'), array('action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('Edit Folder'), array('action' => 'edit', $noteFolder['NoteFolder']['id'])); ?> </li>
+		<li><?php echo $this->Form->postLink(__('Delete Folder'), array('action' => 'delete', $noteFolder['NoteFolder']['id']), null, __('Are you sure you want to delete # %s?', $noteFolder['NoteFolder']['id'])); ?> </li>
+		<li><?php echo $this->Html->link(__('New Folder'), array('action' => 'add')); ?> </li>
 	</ul>
 </div>
 <div class="related">

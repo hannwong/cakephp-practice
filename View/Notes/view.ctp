@@ -6,9 +6,9 @@
 			<?php echo h($note['Note']['id']); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('User'); ?></dt>
+		<dt><?php echo __('Owner'); ?></dt>
 		<dd>
-			<?php echo $this->Html->link($note['User']['id'], array('controller' => 'users', 'action' => 'view', $note['User']['id'])); ?>
+			<?php echo $this->Html->link($note['User']['username'], array('controller' => 'users', 'action' => 'view', $note['User']['id'])); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Title'); ?></dt>
@@ -21,7 +21,7 @@
 			<?php echo h($note['Note']['body']); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('Note Folder'); ?></dt>
+		<dt><?php echo __('Folder'); ?></dt>
 		<dd>
 			<?php echo $this->Html->link($note['NoteFolder']['name'], array('controller' => 'note_folders', 'action' => 'view', $note['NoteFolder']['id'])); ?>
 			&nbsp;
@@ -41,13 +41,9 @@
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>
 	<ul>
+		<li><?php echo $this->Html->link(__('Back'), array('action' => 'index')); ?> </li>
 		<li><?php echo $this->Html->link(__('Edit Note'), array('action' => 'edit', $note['Note']['id'])); ?> </li>
 		<li><?php echo $this->Form->postLink(__('Delete Note'), array('action' => 'delete', $note['Note']['id']), null, __('Are you sure you want to delete # %s?', $note['Note']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('List Notes'), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Note'), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Users'), array('controller' => 'users', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New User'), array('controller' => 'users', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Note Folders'), array('controller' => 'note_folders', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Note Folder'), array('controller' => 'note_folders', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Note'), array('action' => 'add')); ?></li>
 	</ul>
 </div>

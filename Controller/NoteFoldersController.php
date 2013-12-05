@@ -69,15 +69,16 @@ class NoteFoldersController extends AppController {
 			if ($this->NoteFolder->save($this->request->data)) {
 				$this->Session->setFlash(__('The note folder has been saved.'));
 
-				$this->_setDefaultPermissions();
+				$this->_setDefaultPermissions($this->request->data);
 
 				return $this->redirect(array('action' => 'index'));
 			} else {
 				$this->Session->setFlash(__('The note folder could not be saved. Please, try again.'));
 			}
 		}
-		$noteFolders = $this->NoteFolder->ChildNoteFolder->find('list');
-		$this->set(compact('noteFolders'));
+		$noteFolders = $this->NoteFolder->ParentNoteFolder->find('list');
+		$users = $this->NoteFolder->User->find('list');
+		$this->set(compact('users', 'noteFolders'));
 	}
 
 /**
@@ -148,14 +149,25 @@ class NoteFoldersController extends AppController {
 	}
 
 /**
- * Sets default permissions for this Note (allow CRUD by default)
- * Expects $this->Note->User to be set.
+ * Sets default permissions for this NoteFolder (allow CRUD by default)
+ * Expects $this->NoteFolder->id to be set.
+ *
+ * @param array $data $data['NoteFolder']['user_id'] must contain the owner.
  */
-	public function _setDefaultPermissions() {
-		$this->NoteFolder->User->id = $this->NoteFolder->data['User']['id'];
+	public function _setDefaultPermissions($data = null) {
+		$userId = null;
+		$noteFolderId = $this->NoteFolder->id;
+		// Assume $this->NoteFolder->read() was done with valid $this->NoteFolder->id.
+		if (empty($data)) {
+			$userId = $this->NoteFolder->User->data['User']['id'];
+		}
+		else {
+			$userId = $data['NoteFolder']['user_id'];
+		}
 
-		// Allow group and user permissions.
-		$this->Acl->allow($this->NoteFolder->User, $this->NoteFolder);
+		// Allow user permissions.
+		$this->Acl->allow(array('User' => array('id' => $userId)),
+				  array('NoteFolder' => array('id' => $noteFolderId)));
 	}
 
 /**
