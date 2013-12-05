@@ -137,8 +137,9 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 	}
 
 /**
- * User.Group created: root.root, manager1.manager1, user1.user1.
- * User 'manager1' is also in Group 'root'.
+ * Users created: admin1, manager1, manager2, user1.
+ * Groups created: administrators, managers, users.
+ * User 'manager1' is also in Group 'administrators'; the rest are assigned to Groups as expected.
  * ARO roots: World (contains Group(s)), Users (contains User(s)).
  * See User::parentNode(), Group::parentNode(), GroupMember::parentNode().
  */
@@ -160,7 +161,9 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 
 		$data['User'] = array(
 			'admin1' => array('username' => 'admin1', 'password' => 'admin1'),
+			// manager1 belongs to 2 groups: administrators and managers.
 			'manager1' => array('username' => 'manager1', 'password' => 'manager1'),
+			'manager2' => array('username' => 'manager2', 'password' => 'manager2'),
 			'user1' => array('username' => 'user1', 'password' => 'user1')
 			);
 		$data['Group'] = array(
@@ -187,11 +190,12 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 			array('user_id' => $data['User']['admin1']['id'], 'group_id' => $data['Group']['administrators']['id']),
 			array('user_id' => $data['User']['manager1']['id'], 'group_id' => $data['Group']['administrators']['id']),
 			array('user_id' => $data['User']['manager1']['id'], 'group_id' => $data['Group']['managers']['id']),
+			array('user_id' => $data['User']['manager2']['id'], 'group_id' => $data['Group']['managers']['id']),
 			array('user_id' => $data['User']['user1']['id'], 'group_id' => $data['Group']['users']['id'])
 			);
 		$GroupMember->create();
 		if ($GroupMember->saveAll($data['GroupMember'])) {
-			echo "Created 4 group memberships.\n";
+			echo "Created 5 group memberships.\n";
 		}
 
 		return $data;
@@ -203,8 +207,9 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
  *
  * Root ACO node 'Notes' created. See NoteFolder::parentNode().
  *
- * Groups allowed CRUD: 'administrators' to 'Level_1', 'managers' to 'Level_Two', 'users' to 'Level_Trois'.
+ * Groups allowed: 'administrators' to 'Level_1', 'managers' to 'Level_Two', 'users' to 'Level_Trois'.
  * User permissions are per default in NoteFoldersController and NotesController.
+ * Level_1 and note_1 are owned by 'admin1'; level 2 by 'manager2'; level 3 by 'user1'.
  */
         private function createFoldersAndNotes($data) {
 		$Aco = ClassRegistry::init('Aco');
@@ -229,12 +234,12 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 
 		$data['NoteFolder'] = array(
 			'level_1' => array('name' => 'Level_1', 'user_id' => $data['User']['admin1']['id']),
-			'level_2' => array('name' => 'Level_Two', 'user_id' => $data['User']['manager1']['id']),
+			'level_2' => array('name' => 'Level_Two', 'user_id' => $data['User']['manager2']['id']),
 			'level_3' => array('name' => 'Level_Trois', 'user_id' => $data['User']['user1']['id'])
 		);
 		$data['Note'] = array(
 			'note_1' => array('title' => 'Note 1 Title', 'body' => 'Note 1 Body.', 'user_id' => $data['User']['admin1']['id']),
-			'note_2' => array('title' => 'Note 2 Title', 'body' => 'Note 2 Body.', 'user_id' => $data['User']['manager1']['id']),
+			'note_2' => array('title' => 'Note 2 Title', 'body' => 'Note 2 Body.', 'user_id' => $data['User']['manager2']['id']),
 			'note_3' => array('title' => 'Note 3 Title', 'body' => 'Note 3 Body.', 'user_id' => $data['User']['user1']['id'])
 		);
 
@@ -337,6 +342,7 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 
 /**
  * Test of all the permissions set so far.
+ * TODO: Move these to unit tests.
  */
 	private function testPermissions($data) {
 		$User = ClassRegistry::init('User');
@@ -346,6 +352,7 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 
 		$userAdmin1 = array('User' => array('id' => $data['User']['admin1']['id']));
 		$userManager1 = array('User' => array('id' => $data['User']['manager1']['id']));
+		$userManager2 = array('User' => array('id' => $data['User']['manager2']['id']));
 		$userUser1 = array('User' => array('id' => $data['User']['user1']['id']));
 
 		$noteFolderL1 = array('NoteFolder' => array('id' => $data['NoteFolder']['level_1']['id']));
@@ -356,23 +363,62 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 		$note2 = array('Note' => array('id' => $data['Note']['note_2']['id']));
 		$note3 = array('Note' => array('id' => $data['Note']['note_3']['id']));
 
+		$strAccessTmpl = "access to %s NoteFolder(s) and Note(s).\n";
+		$strUserTmpl = " User '%s' ";
+		$strPass = "TEST PASSED!"; $strFail = "TEST FAILED!";
+		$strHasAcc = "has "; $strNoAcc = "has NO ";
+		$strMsg = '';
+
+		$strAccess = sprintf($strAccessTmpl, "Level 1, 2 and 3");
+		$strUser = sprintf($strUserTmpl, "admin1");
 		if ($RbAcl->check($userAdmin1, $noteFolderL1) && $RbAcl->check($userAdmin1, $note1) &&
 		    $RbAcl->check($userAdmin1, $noteFolderL2) && $RbAcl->check($userAdmin1, $note2) &&
 		    $RbAcl->check($userAdmin1, $noteFolderL3) && $RbAcl->check($userAdmin1, $note3))
-			echo "TEST PASSED! User 'admin1' has CRUD access to all NoteFolder(s) and Note(s).\n";
+			$strMsg = $strPass . $strUser . $strHasAcc . $strAccess;
+		else
+			$strMsg = $strFail . $strUser . $strNoAcc . $strAccess;
+		echo $strMsg;
 
+		$strUser = sprintf($strUserTmpl, "manager1");
 		if ($RbAcl->check($userManager1, $noteFolderL1) && $RbAcl->check($userManager1, $note1) &&
 		    $RbAcl->check($userManager1, $noteFolderL2) && $RbAcl->check($userManager1, $note2) &&
 		    $RbAcl->check($userManager1, $noteFolderL3) && $RbAcl->check($userManager1, $note3))
-			echo "TEST PASSED! User 'manager1' has CRUD access to all NoteFolder(s) and Note(s).\n";
+			$strMsg = $strPass . $strUser . $strHasAcc . $strAccess;
+		else
+			$strMsg = $strFail . $strUser . $strNoAcc . $strAccess;
+		echo $strMsg;
 
+		$strAccess = sprintf($strAccessTmpl, "Level 1");
+		$strUser = sprintf($strUserTmpl, "manager2");
+		if (!($RbAcl->check($userManager2, $noteFolderL1) || $RbAcl->check($userManager2, $note1)))
+			$strMsg = $strPass . $strUser . $strNoAcc . $strAccess;
+		else
+			$strMsg = $strFail . $strUser . $strHasAcc . $strAccess;
+		echo $strMsg;
+
+		$strAccess = sprintf($strAccessTmpl, "Level 2 and 3");
+		if ($RbAcl->check($userManager2, $noteFolderL2) && $RbAcl->check($userManager2, $note2) &&
+		    $RbAcl->check($userManager2, $noteFolderL3) && $RbAcl->check($userManager2, $note3))
+			$strMsg = $strPass . $strUser . $strHasAcc . $strAccess;
+		else
+			$strMsg = $strFail . $strUser . $strNoAcc . $strAccess;
+		echo $strMsg;
+
+		$strAccess = sprintf($strAccessTmpl, "Level 1 and 2");
+		$strUser = sprintf($strUserTmpl, "user1");
 		if (!($RbAcl->check($userUser1, $noteFolderL1) || $RbAcl->check($userUser1, $note1) ||
 		      $RbAcl->check($userUser1, $noteFolderL2) || $RbAcl->check($userUser1, $note2)))
-			echo "TEST PASSED! User 'user1' has NO access to Level 1 and 2 NoteFolder(s) and Note(s).\n";
+			$strMsg = $strPass . $strUser . $strNoAcc . $strAccess;
+		else
+			$strMsg = $strFail . $strUser . $strHasAcc . $strAccess;
+		echo $strMsg;
 
+		$strAccess = sprintf($strAccessTmpl, "Level 3");
 		if ($RbAcl->check($userManager1, $noteFolderL3) && $RbAcl->check($userManager1, $note3))
-			echo "TEST PASSED! User 'user1' has CRUD access to Level 3 NoteFolder(s) and Note(s).\n";
-
+			$strMsg = $strPass . $strUser . $strHasAcc . $strAccess;
+		else
+			$strMsg = $strFail . $strUser . $strNoAcc . $strAccess;
+		echo $strMsg;
 	}
 
 }
