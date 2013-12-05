@@ -159,7 +159,7 @@ class NoteFoldersController extends AppController {
 		$noteFolderId = $this->NoteFolder->id;
 		// Assume $this->NoteFolder->read() was done with valid $this->NoteFolder->id.
 		if (empty($data)) {
-			$userId = $this->NoteFolder->User->data['User']['id'];
+			$userId = $this->NoteFolder->data['User']['id'];
 		}
 		else {
 			$userId = $data['NoteFolder']['user_id'];

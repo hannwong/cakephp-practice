@@ -228,9 +228,13 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 		$data['Aco'] = array('Notes' => array('parent_id' => NULL, 'alias' => 'Notes'));
 		$Aco->create();
 		if (!$Aco->save($data['Aco']['Notes']))
-				continue;
+			return;
 		echo "Root ACO for NoteFolders/Notes created.\n";
 		$data['Aco']['Notes']['id'] = $Aco->getInsertID(); // Just in case. Seems I don't need it.
+
+		// Deny all first.
+		$RbAcl = new RbAcl();
+		$RbAcl->deny('World', 'Notes'); $RbAcl->deny('Users', 'Notes');
 
 		$data['NoteFolder'] = array(
 			'level_1' => array('name' => 'Level_1', 'user_id' => $data['User']['admin1']['id']),
