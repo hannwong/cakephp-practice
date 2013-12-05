@@ -4,7 +4,7 @@
 		<legend><?php echo __('Add Note Folder'); ?></legend>
 	<?php
 		echo $this->Form->input('name');
-		echo $this->Form->input('folder_id');
+		echo $this->Form->input('note_folder_id');
 		echo $this->Form->input('user_id');
 	?>
 	</fieldset>

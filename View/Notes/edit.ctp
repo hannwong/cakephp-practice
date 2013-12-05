@@ -7,7 +7,7 @@
 		echo $this->Form->input('user_id');
 		echo $this->Form->input('title');
 		echo $this->Form->input('body');
-		echo $this->Form->input('folder_id');
+		echo $this->Form->input('note_folder_id');
 	?>
 	</fieldset>
 <?php echo $this->Form->end(__('Submit')); ?>

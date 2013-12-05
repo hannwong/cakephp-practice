@@ -60,7 +60,7 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 					'id' => array('type' => 'integer', 'key' => 'primary'),
 					'name' => array('type' => 'string', 'null' => false),
 					// Parent folder
-					'folder_id' => array('type' => 'integer', 'null' => true),
+					'note_folder_id' => array('type' => 'integer', 'null' => true),
 					// Owner of the folder. Only owners can delete.
 					'user_id' => array('type' => 'integer', 'null' => false),
 					'created' => array('type' => 'datetime', 'null' => true),
@@ -73,7 +73,7 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 					'title' => array('type' => 'string', 'null' => false),
 					'body' => array('type' => 'text', 'null' => true),
 					// Parent folder
-					'folder_id' => array('type' => 'integer', 'null' => false),
+					'note_folder_id' => array('type' => 'integer', 'null' => false),
 					// Owner of the note. Only owners can delete.
 					'user_id' => array('type' => 'integer', 'null' => false),
 					'created' => array('type' => 'datetime', 'null' => true),
@@ -249,10 +249,11 @@ class CreatesInitialTablesAndData1385727631 extends CakeMigration {
 			case 3: $NoteFoldersController->_allowGroupPermissions($data['Group']['users']['id']); break;
 			}
 
-			$data['NoteFolder']['level_'.$i]['id'] = $data['Note']['note_'.$i]['folder_id'] = $NoteFolder->getInsertID();
+			$data['NoteFolder']['level_'.$i]['id'] = $data['Note']['note_'.$i]['note_folder_id'] =
+				$NoteFolder->getInsertID();
 
 			if ($i < 3)
-				$data['NoteFolder']['level_'.($i + 1)]['folder_id'] = $NoteFolder->getInsertID();
+				$data['NoteFolder']['level_'.($i + 1)]['note_folder_id'] = $NoteFolder->getInsertID();
 
 			if (!$Note->save($data['Note']['note_'.$i]))
 				return;

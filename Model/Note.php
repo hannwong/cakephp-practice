@@ -19,10 +19,10 @@ class Note extends AppModel {
 		if (!$this->id && empty($this->data)) {
 			return null;
 		}
-		if (isset($this->data['Note']['folder_id'])) {
-			$folderId = $this->data['Note']['folder_id'];
+		if (isset($this->data['Note']['note_folder_id'])) {
+			$folderId = $this->data['Note']['note_folder_id'];
 		} else {
-			$folderId = $this->field('folder_id');
+			$folderId = $this->field('note_folder_id');
 		}
 		if (!$folderId) {
 			return null; // Should not happen. TODO: Throw exception here.
@@ -48,7 +48,7 @@ class Note extends AppModel {
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
-		'folder_id' => array(
+		'note_folder_id' => array(
 			'numeric' => array(
 				'rule' => array('numeric'),
 				//'message' => 'Your custom message here',
@@ -88,10 +88,24 @@ class Note extends AppModel {
 		),
 		'NoteFolder' => array(
 			'className' => 'NoteFolder',
-			'foreignKey' => 'folder_id',
+			'foreignKey' => 'note_folder_id',
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
 		)
 	);
+
+/**
+ * Paginate method. Called from PaginateComponent's paginate() (l 191).
+ *
+ * Note to self: This is only useful if we have only DB-specific filters to add. Models have no access to
+ *   Controllers nor Components.
+ */
+	// public function paginate($conditions = null, $fields = null, $order = null, $limit = null,
+	// 			 $page = null, $recursive = null, $extra = null) {
+	// 	// Oops. We don't have access to AclComponent here. No go. Do this at NotesController instead.
+
+	// 	// TODO: Optimize this via $conditions. Perhaps look at Permission::check(). Possibly
+	// 	//   complex. Take this as fun research when time permits.
+	// }
 }

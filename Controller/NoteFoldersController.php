@@ -22,7 +22,18 @@ class NoteFoldersController extends AppController {
  */
 	public function index() {
 		$this->NoteFolder->recursive = 0;
-		$this->set('noteFolders', $this->Paginator->paginate());
+		$result = $this->Paginator->paginate();
+
+		// Fully commented at NotesController::index().
+
+		$passed = array();
+		foreach ($result as $row) {
+			if (!$this->_aclCheck($row['NoteFolder']['id'], 'read'))
+				continue;
+			array_push($passed, $row);
+		}
+
+		$this->set('noteFolders', $passed);
 	}
 
 /**
@@ -37,12 +48,19 @@ class NoteFoldersController extends AppController {
 			throw new NotFoundException(__('Invalid note folder'));
 		}
 		$options = array('conditions' => array('NoteFolder.' . $this->NoteFolder->primaryKey => $id));
-		$this->set('noteFolder', $this->NoteFolder->find('first', $options));
+
+		$result = $this->NoteFolder->find('first', $options);
+
+		if (!$this->_aclCheck($result['NoteFolder']['id'], 'read'))
+			throw new NotFoundException(__('Invalid note folder'));
+
+		$this->set('noteFolder', $result);
 	}
 
 /**
  * add method
  *
+ * TODO: Acl check. Also limit the options for parent NoteFolder according to Acl checks.
  * @return void
  */
 	public function add() {
@@ -73,7 +91,12 @@ class NoteFoldersController extends AppController {
 		if (!$this->NoteFolder->exists($id)) {
 			throw new NotFoundException(__('Invalid note folder'));
 		}
+		if (!$this->_aclCheck($id, 'update'))
+			throw new NotFoundException(__('Invalid note folder'));
 		if ($this->request->is(array('post', 'put'))) {
+			if (!$this->_aclCheck($this->request->data['NoteFolder']['id'], 'update'))
+				throw new NotFoundException(__('Invalid note folder'));
+
 			// Get old owner. Need to remove permissions if ownership has changed.
 			$user = $this->NoteFolder->User->findById($this->Note->User->id);
 
@@ -94,8 +117,9 @@ class NoteFoldersController extends AppController {
 			$options = array('conditions' => array('NoteFolder.' . $this->NoteFolder->primaryKey => $id));
 			$this->request->data = $this->NoteFolder->find('first', $options);
 		}
-		$noteFolders = $this->NoteFolder->NoteFolder->find('list');
-		$this->set(compact('noteFolders'));
+		$noteFolders = $this->NoteFolder->ParentNoteFolder->find('list');
+		$users = $this->NoteFolder->User->find('list');
+		$this->set(compact('users', 'noteFolders'));
 	}
 
 /**
@@ -111,6 +135,8 @@ class NoteFoldersController extends AppController {
 			throw new NotFoundException(__('Invalid note folder'));
 		}
 		$this->request->onlyAllow('post', 'delete');
+		if (!$this->_aclCheck($id, 'delete'))
+			throw new NotFoundException(__('Invalid note folder'));
 
 		if ($this->NoteFolder->delete()) {
 			$this->Session->setFlash(__('The note folder has been deleted.'));
@@ -122,14 +148,27 @@ class NoteFoldersController extends AppController {
 	}
 
 /**
- * Sets default permissions for thie Note (allow CRUD by default)
- * Expects $this->Note->User and $this->Note->Group to be set.
+ * Sets default permissions for this Note (allow CRUD by default)
+ * Expects $this->Note->User to be set.
  */
 	public function _setDefaultPermissions() {
 		$this->NoteFolder->User->id = $this->NoteFolder->data['User']['id'];
 
 		// Allow group and user permissions.
 		$this->Acl->allow($this->NoteFolder->User, $this->NoteFolder);
+	}
+
+/**
+ * Acl check. ARO is the logged in User.
+ *
+ * @param string $id ID of NoteFolder (the ACO).
+ * @param string $action permission key to check for (*, create, read, update, delete).
+ * @return boolean Success
+ */
+	public function _aclCheck($id = null, $action = '*') {
+		if (empty($id)) return false;
+		return $this->Acl->check(array('User' => array('id' => $this->Auth->user('id'))),
+					 array('NoteFolder' => array('id' => $id), $action));
 	}
 
 	public function _allowGroupPermissions($groupId, $action = '*') {

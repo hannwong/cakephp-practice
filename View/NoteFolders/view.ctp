@@ -65,7 +65,7 @@
 		<tr>
 			<td><?php echo $childNoteFolder['id']; ?></td>
 			<td><?php echo $childNoteFolder['name']; ?></td>
-			<td><?php echo $childNoteFolder['folder_id']; ?></td>
+			<td><?php echo $childNoteFolder['note_folder_id']; ?></td>
 			<td><?php echo $childNoteFolder['user_id']; ?></td>
 			<td><?php echo $childNoteFolder['created']; ?></td>
 			<td><?php echo $childNoteFolder['modified']; ?></td>
@@ -105,7 +105,7 @@
 			<td><?php echo $note['user_id']; ?></td>
 			<td><?php echo $note['title']; ?></td>
 			<td><?php echo $note['body']; ?></td>
-			<td><?php echo $note['folder_id']; ?></td>
+			<td><?php echo $note['note_folder_id']; ?></td>
 			<td><?php echo $note['created']; ?></td>
 			<td><?php echo $note['modified']; ?></td>
 			<td class="actions">

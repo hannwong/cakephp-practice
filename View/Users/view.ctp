@@ -59,7 +59,7 @@
 		<tr>
 			<td><?php echo $note['id']; ?></td>
 			<td><?php echo $note['user_id']; ?></td>
-			<td><?php echo $note['folder_id']; ?></td>
+			<td><?php echo $note['note_folder_id']; ?></td>
 			<td><?php echo $note['title']; ?></td>
 			<td><?php echo $note['body']; ?></td>
 			<td><?php echo $note['created']; ?></td>

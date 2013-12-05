@@ -31,10 +31,10 @@ class NoteFolder extends AppModel {
 		if (!$this->id && empty($this->data)) {
 			return null;
 		}
-		if (isset($this->data['NoteFolder']['folder_id'])) {
-			$folderId = $this->data['NoteFolder']['folder_id'];
+		if (isset($this->data['NoteFolder']['note_folder_id'])) {
+			$folderId = $this->data['NoteFolder']['note_folder_id'];
 		} else {
-			$folderId = $this->field('folder_id');
+			$folderId = $this->field('note_folder_id');
 		}
 		if (!$folderId) {
 			return "Notes"; // Root ARO node.
@@ -71,7 +71,7 @@ class NoteFolder extends AppModel {
 	public $belongsTo = array(
 		'ParentNoteFolder' => array(
 			'className' => 'NoteFolder',
-			'foreignKey' => 'folder_id',
+			'foreignKey' => 'note_folder_id',
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
@@ -93,7 +93,7 @@ class NoteFolder extends AppModel {
 	public $hasMany = array(
 		'ChildNoteFolder' => array(
 			'className' => 'NoteFolder',
-			'foreignKey' => 'folder_id',
+			'foreignKey' => 'note_folder_id',
 			'dependent' => false,
 			'conditions' => '',
 			'fields' => '',
@@ -106,7 +106,7 @@ class NoteFolder extends AppModel {
 		),
 		'Note' => array(
 			'className' => 'Note',
-			'foreignKey' => 'folder_id',
+			'foreignKey' => 'note_folder_id',
 			'dependent' => false,
 			'conditions' => '',
 			'fields' => '',
