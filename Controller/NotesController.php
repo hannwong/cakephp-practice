@@ -50,11 +50,47 @@ class NotesController extends AppController {
 		if (!$this->Note->exists($id)) {
 			throw new NotFoundException(__('Invalid note'));
 		}
-		$options = array('conditions' => array('Note.' . $this->Note->primaryKey => $id));
+		if (!$this->_aclCheck($id, 'read'))
+			throw new NotFoundException(__('Invalid note'));
+
+		$options = array(
+			'conditions' => array('Note.' . $this->Note->primaryKey => $id),
+			// Grab User and Group permissions too.
+			'recursive' => 2,
+			// Prune off associations we don't need. (ContainableBehavior::containments())
+			'contain' => array(
+				'User', 'NoteFolder',
+				'Aco' => array('Aro' => array(
+						       'fields' => array('model', 'foreign_key'),
+						       'Permission' => array())
+				)
+			)
+		);
 		$result = $this->Note->find('first', $options);
 
-		if (!$this->_aclCheck($result['Note']['id'], 'read'))
-			throw new NotFoundException(__('Invalid note'));
+		$Group = ClassRegistry::init('Group');
+		$result['groupPerms'] = array();
+		$result['userPerms'] = array();
+		foreach ($result['Aco']['Aro'] as $aro) {
+			if ($aro['model'] == 'Group') {
+				$aro = array_merge($Group->find('first',
+					array(
+						'conditions' => array('Group.id' => $aro['foreign_key']),
+						'recursive' => -1
+					)
+				), $aro);
+				array_push($result['groupPerms'], $aro);
+			}
+			else if ($aro['model'] == 'User') {
+				$aro = array_merge($this->Note->User->find('first',
+					array(
+						'conditions' => array('User.id' => $aro['foreign_key']),
+						'recursive' => -1
+					)
+				), $aro);
+				array_push($result['userPerms'], $aro);
+			}
+		}
 
 		$this->set('note', $result);
 	}

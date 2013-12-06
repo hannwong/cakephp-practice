@@ -45,14 +45,49 @@ class NoteFoldersController extends AppController {
  */
 	public function view($id = null) {
 		if (!$this->NoteFolder->exists($id)) {
-			throw new NotFoundException(__('Invalid note folder'));
+			throw new NotFoundException(__('Invalid folder'));
 		}
-		$options = array('conditions' => array('NoteFolder.' . $this->NoteFolder->primaryKey => $id));
+		if (!$this->_aclCheck($id, 'read'))
+			throw new NotFoundException(__('Invalid folder'));
 
+		$options = array(
+			'conditions' => array('NoteFolder.' . $this->NoteFolder->primaryKey => $id),
+			// Grab User and Group permissions too.
+			'recursive' => 2,
+			// Prune off associations we don't need. (ContainableBehavior::containments())
+			'contain' => array(
+				'ParentNoteFolder', 'User', 'ChildNoteFolder', 'Note',
+				'Aco' => array('Aro' => array(
+						       'fields' => array('model', 'foreign_key'),
+						       'Permission' => array())
+				)
+			)
+		);
 		$result = $this->NoteFolder->find('first', $options);
 
-		if (!$this->_aclCheck($result['NoteFolder']['id'], 'read'))
-			throw new NotFoundException(__('Invalid folder'));
+		$Group = ClassRegistry::init('Group');
+		$result['groupPerms'] = array();
+		$result['userPerms'] = array();
+		foreach ($result['Aco']['Aro'] as $aro) {
+			if ($aro['model'] == 'Group') {
+				$aro = array_merge($Group->find('first',
+					array(
+						'conditions' => array('Group.id' => $aro['foreign_key']),
+						'recursive' => -1
+					)
+				), $aro);
+				array_push($result['groupPerms'], $aro);
+			}
+			else if ($aro['model'] == 'User') {
+				$aro = array_merge($this->NoteFolder->User->find('first',
+					array(
+						'conditions' => array('User.id' => $aro['foreign_key']),
+						'recursive' => -1
+					)
+				), $aro);
+				array_push($result['userPerms'], $aro);
+			}
+		}
 
 		$this->set('noteFolder', $result);
 	}

@@ -8,7 +8,10 @@ App::uses('AppModel', 'Model');
  */
 class Note extends AppModel {
 
-	public $actsAs = array('Acl' => array('type' => 'controlled'));
+	public $actsAs = array(
+		'Acl' => array('type' => 'controlled'),
+		'Containable'
+	);
 
 /**
  * See NoteFolder::parentNode().
@@ -90,6 +93,21 @@ class Note extends AppModel {
 			'className' => 'NoteFolder',
 			'foreignKey' => 'note_folder_id',
 			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+		)
+	);
+
+/**
+ * hasOne associations
+ *
+ * @var array
+ */
+	public $hasOne = array(
+		'Aco' => array(
+			'className' => 'Aco',
+			'foreignKey' => 'foreign_key',
+			'conditions' => array('Aco.model' => 'Note'),
 			'fields' => '',
 			'order' => ''
 		)

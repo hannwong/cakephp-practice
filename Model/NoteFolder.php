@@ -11,7 +11,10 @@ App::uses('AppModel', 'Model');
  */
 class NoteFolder extends AppModel {
 
-	public $actsAs = array('Acl' => array('type' => 'controlled'));
+	public $actsAs = array(
+		'Acl' => array('type' => 'controlled'),
+		'Containable'
+	);
 
 /**
  * All NoteFolder(s)/Notes are listed under "Notes" root ACO.
@@ -116,6 +119,21 @@ class NoteFolder extends AppModel {
 			'exclusive' => '',
 			'finderQuery' => '',
 			'counterQuery' => ''
+		)
+	);
+
+/**
+ * hasOne associations
+ *
+ * @var array
+ */
+	public $hasOne = array(
+		'Aco' => array(
+			'className' => 'Aco',
+			'foreignKey' => 'foreign_key',
+			'conditions' => array('Aco.model' => 'NoteFolder'),
+			'fields' => '',
+			'order' => ''
 		)
 	);
 

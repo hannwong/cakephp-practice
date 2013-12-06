@@ -43,7 +43,7 @@
 	</ul>
 </div>
 <div class="related">
-	<h3><?php echo __('Related Note Folders'); ?></h3>
+	<h3><?php echo __('Subfolders'); ?></h3>
 	<?php if (!empty($noteFolder['ChildNoteFolder'])): ?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
@@ -80,15 +80,15 @@
 	</div>
 </div>
 <div class="related">
-	<h3><?php echo __('Related Notes'); ?></h3>
+	<h3><?php echo __('Notes'); ?></h3>
 	<?php if (!empty($noteFolder['Note'])): ?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
 		<th><?php echo __('Id'); ?></th>
-		<th><?php echo __('User Id'); ?></th>
 		<th><?php echo __('Title'); ?></th>
 		<th><?php echo __('Body'); ?></th>
 		<th><?php echo __('Folder Id'); ?></th>
+		<th><?php echo __('User Id'); ?></th>
 		<th><?php echo __('Created'); ?></th>
 		<th><?php echo __('Modified'); ?></th>
 		<th class="actions"><?php echo __('Actions'); ?></th>
@@ -96,10 +96,10 @@
 	<?php foreach ($noteFolder['Note'] as $note): ?>
 		<tr>
 			<td><?php echo $note['id']; ?></td>
-			<td><?php echo $note['user_id']; ?></td>
 			<td><?php echo $note['title']; ?></td>
 			<td><?php echo $note['body']; ?></td>
 			<td><?php echo $note['note_folder_id']; ?></td>
+			<td><?php echo $note['user_id']; ?></td>
 			<td><?php echo $note['created']; ?></td>
 			<td><?php echo $note['modified']; ?></td>
 			<td class="actions">
@@ -115,6 +115,78 @@
 	<div class="actions">
 		<ul>
 			<li><?php echo $this->Html->link(__('New Note'), array('controller' => 'notes', 'action' => 'add')); ?> </li>
+		</ul>
+	</div>
+</div>
+<div class="related">
+	<h3><?php echo __('Group Permissions'); ?></h3>
+	<h4><?php echo __('(CRUD. -1 deny; 0 inherit; 1 allow)'); ?></h4>
+	<?php if (!empty($noteFolder['groupPerms'])): ?>
+	<table cellpadding = "0" cellspacing = "0">
+	<tr>
+		<th><?php echo __('Id'); ?></th>
+		<th><?php echo __('Name'); ?></th>
+		<th><?php echo __('Create'); ?></th>
+		<th><?php echo __('Read'); ?></th>
+		<th><?php echo __('Update'); ?></th>
+		<th><?php echo __('Delete'); ?></th>
+		<th class="actions"><?php echo __('Actions'); ?></th>
+	</tr>
+	<?php foreach ($noteFolder['groupPerms'] as $perm): ?>
+		<tr>
+			<td><?php echo $perm['Group']['id']; ?></td>
+			<td><?php echo $perm['Group']['name']; ?></td>
+			<td><?php echo $perm['Permission']['_create']; ?></td>
+			<td><?php echo $perm['Permission']['_read']; ?></td>
+			<td><?php echo $perm['Permission']['_update']; ?></td>
+			<td><?php echo $perm['Permission']['_delete']; ?></td>
+			<td class="actions">
+				<?php echo __('Coming Soon!'); ?>
+			</td>
+		</tr>
+	<?php endforeach; ?>
+	</table>
+<?php endif; ?>
+
+	<div class="actions">
+		<ul>
+			<li>New Group Permission (Coming Soon!)</li>
+		</ul>
+	</div>
+</div>
+<div class="related">
+	<h3><?php echo __('User Permissions'); ?></h3>
+	<h4><?php echo __('(CRUD. -1 deny; 0 inherit; 1 allow)'); ?></h4>
+	<?php if (!empty($noteFolder['userPerms'])): ?>
+	<table cellpadding = "0" cellspacing = "0">
+	<tr>
+		<th><?php echo __('Id'); ?></th>
+		<th><?php echo __('Name'); ?></th>
+		<th><?php echo __('Create'); ?></th>
+		<th><?php echo __('Read'); ?></th>
+		<th><?php echo __('Update'); ?></th>
+		<th><?php echo __('Delete'); ?></th>
+		<th class="actions"><?php echo __('Actions'); ?></th>
+	</tr>
+	<?php foreach ($noteFolder['userPerms'] as $perm): ?>
+		<tr>
+			<td><?php echo $perm['User']['id']; ?></td>
+			<td><?php echo $perm['User']['username']; ?></td>
+			<td><?php echo $perm['Permission']['_create']; ?></td>
+			<td><?php echo $perm['Permission']['_read']; ?></td>
+			<td><?php echo $perm['Permission']['_update']; ?></td>
+			<td><?php echo $perm['Permission']['_delete']; ?></td>
+			<td class="actions">
+				<?php echo __('Coming Soon!'); ?>
+			</td>
+		</tr>
+	<?php endforeach; ?>
+	</table>
+<?php endif; ?>
+
+	<div class="actions">
+		<ul>
+			<li>New User Permission (Coming Soon!)</li>
 		</ul>
 	</div>
 </div>
