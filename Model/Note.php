@@ -79,6 +79,12 @@ class Note extends AppModel {
 /**
  * belongsTo associations
  *
+ * hasOne and belongsTo both associate joins into a single query.
+ *   (DboSource::generateAssociationQuery(), l 1553 - 1567)
+ * As such, we can place distant relations here (eg 'Departments') without needing recursive finds
+ *   (DboSource::read() l 1112)
+ * Recursive finds are separate queries, incurring overheads for each one.
+ *
  * @var array
  */
 	public $belongsTo = array(
@@ -86,6 +92,15 @@ class Note extends AppModel {
 			'className' => 'User',
 			'foreignKey' => 'user_id',
 			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+		),
+		// Example of a distant relation rolled into original single query.
+		'Department' => array(
+			'className' => 'Department',
+			'foreignKey' => false,
+			// The aliases here refer to association names above this line.
+			'conditions' => array('User.department_id = Department.id'),
 			'fields' => '',
 			'order' => ''
 		),

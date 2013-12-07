@@ -6,11 +6,6 @@
 			<?php echo h($note['Note']['id']); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('Owner'); ?></dt>
-		<dd>
-			<?php echo $this->Html->link($note['User']['username'], array('controller' => 'users', 'action' => 'view', $note['User']['id'])); ?>
-			&nbsp;
-		</dd>
 		<dt><?php echo __('Title'); ?></dt>
 		<dd>
 			<?php echo h($note['Note']['title']); ?>
@@ -24,6 +19,16 @@
 		<dt><?php echo __('Folder'); ?></dt>
 		<dd>
 			<?php echo $this->Html->link($note['NoteFolder']['name'], array('controller' => 'note_folders', 'action' => 'view', $note['NoteFolder']['id'])); ?>
+			&nbsp;
+		</dd>
+		<dt><?php echo __('Department'); ?></dt>
+		<dd>
+			<?php echo h($note['Department']['name']); ?>
+			&nbsp;
+		</dd>
+		<dt><?php echo __('Owner'); ?></dt>
+		<dd>
+			<?php echo $this->Html->link($note['User']['username'], array('controller' => 'users', 'action' => 'view', $note['User']['id'])); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Created'); ?></dt>

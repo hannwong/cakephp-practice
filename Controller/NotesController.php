@@ -57,9 +57,12 @@ class NotesController extends AppController {
 			'conditions' => array('Note.' . $this->Note->primaryKey => $id),
 			// Grab User and Group permissions too.
 			'recursive' => 2,
-			// Prune off associations we don't need. (ContainableBehavior::containments())
+			// Prune off associations we don't need. (ContainableBehavior::beforeFind() l 156)
+			// Prunes even associations in the original single query
+			//   (hasOne and belongsTo; see comment at Note::$belongsTo)
+			//   Try removing 'Department' and see it not retrieved in the single query.
 			'contain' => array(
-				'User', 'NoteFolder',
+				'User', 'NoteFolder', 'Department',
 				'Aco' => array('Aro' => array(
 						       'fields' => array('model', 'foreign_key'),
 						       'Permission' => array())
