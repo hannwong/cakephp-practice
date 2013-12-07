@@ -1,12 +1,34 @@
+# Table of Contents
+
+* [Practicing CakePHP](#practicing-cakephp)
+* [Deploying My Codes](#deploying-my-codes)
+* [Plugins Needed](#plugins-needed)
+* [Lessons Learned](#lessons-learned)
+    * [Using Migrations Plugin with SCM](#using-migrations-plugin-with-scm)
+    * [Associations Retrieved In A Single Query (Even Distant Ones)](#associations-retrieved-in-a-single-query-even-distant-ones)
+* [CakePHP Schema Definition Language](#cakephp-schema-definition-language)
+    * [Overview and Example](#overview-and-example)
+    * [Table Attributes](#table-attributes)
+    * [Field Attributes](#field-attributes)
+        * [`'type'`](#field-attribute-type)
+        * [`'length'`](#field-attribute-length)
+        * [`'null'`](#field-attribute-null)
+        * [`'default'`](#field-attribute-default)
+        * [`'key'`](#field-attribute-key)
+
 # Practicing CakePHP
 
 This will serve as a perpetual reference and tutorial for myself too.
 
 I am currently attempting to build an open-source profile. Hopefully, someone will see that I have learned CakePHP well and hire me!
 
+[Back to top](#table-of-contents)
+
 # Deploying My Codes
 
 Unpack into your CakePHP's `app` folder.
+
+[Back to top](#table-of-contents)
 
 # Plugins Needed
 
@@ -25,9 +47,148 @@ _Migrations_ is used extensively. It makes for a very good RDBMS-agnostic way to
 
 I had used it so extensively that I unconsciously created rather extensive docs for it.
 
-In fact, I include here the updated docs for _"CakePHP Schema Definition Language"_. Neither the [official CakePHP docs](http://book.cakephp.org/2.0/en/console-and-shells/schema-management-and-migrations.html) nor the [Migrations plugin docs](https://github.com/CakeDC/migrations/blob/master/readme.md) are complete or update-to-date. (TODO for self: Learn how I can contribute to CakePHP's documentation.)
+In fact, I include here the updated docs for [CakePHP Schema Definition Language](#cakephp-schema-definition-language). Neither the [official CakePHP docs](http://book.cakephp.org/2.0/en/console-and-shells/schema-management-and-migrations.html) nor the [Migrations plugin docs](https://github.com/CakeDC/migrations/blob/master/readme.md) are complete or update-to-date. (TODO for self: Learn how I can contribute to CakePHP's documentation.)
+
+[Back to top](#table-of-contents)
+
+# Lessons Learned
+
+Here are a series of lessons I chanced upon _while_ building this app.
+
+_"While"_ is the operative word, the most valuable hard-earned lesson in my building this app.
+
+_I started out unconsciously trying to write a textbook on CakePHP_ to showcase my abilities with CakePHP. My task was to finish up this app, an assessment. I wasted time thinking too hard about creating the various scenarios that lend well to these lessons listed in this section.
+
+But how's that possible? How can I know what lessons to create scenarios for? Well, most of these _"lessons"_ were _"learned"_ before I even started building this app: I read the CakePHP source code like an open book.
+
+And to my potential employer (the one I'm desperately trying to impress now!), my forgetting CakePHP internals in my first interview was because I didn't _study_ for the CakePHP interview. I thought it would be an _open book test_. I learned the definition of _"homework"_ that day: homework is to be _done_, not merely to be mentioned as a _possibility_.
+
+No, I am not particularly susceptible to scope-creep, nor do I particularly love writing textbooks. You gotta understand the _power and draw_ this potential employer has on me, so you'll know my psychotic desperation to avoid doing homework that is seen as below their standards. Writing a textbook on CakePHP would definitely have earned me a place with that employer, but that was not humanly possible in a short time! I can read source codes like an open book; I cannot write books in an instant.  
+(To me: repeat after myself... _"I am mere mortal, I cannot fly, stop watching DC Comics movies"_)
+
+Big failure. Lesson learned. **I gotta be objective, cool-headed, no matter how sexy the potential employer is!**  
+(Oh yes, it is _that_ tough to get into the top open-source communities. All you _"open-source is a mess of crap"_ mentality employers out there, you don't know how sweet are the grapes that you call sour. Use the _force_, or be left behind, Spock. I mean Luke. Well, I don't have a Star Trek assessment coming up. :P)
+
+* [Using Migrations Plugin with SCM](#using-migrations-plugin-with-scm)
+* [Associations Retrieved In A Single Query (Even Distant Ones)](#associations-retrieved-in-a-single-query-even-distant-ones)
+
+[Back to top](#table-of-contents)
+
+## Using Migrations Plugin with SCM
+
+From the perspective of the person checking out the codes, the upgrade path looks natural.
+
+However, to the coder, there seems to be a snag. There isn't; it's just an illusion. If there is no such snag, something is very wrong.
+
+See commits:
+
+* 18021aa5a3 (contains 1st _Migrations_ script, with Model(s) to match)
+* 3b6740a2b3 (contains 2nd _Migrations_ script, with Model(s) to match)
+
+From the perspective of the person checking out the codes, the upgrade path looks natural:
+
+* Check out commit 18021aa5a3
+* Perform a `Migrations.migration run up`.
+* See that there are no more _"up"_ migrations in that checkout.
+* Check out commit 3b6740a2b3
+* Perform a `Migrations.migration run up`.
+* See that the 2nd _Migrations_ script is there for the above command.
+
+From the perspective of the coder, it's not that obvious:
+
+* Check out commit 3b6740a2b3
+* Perform a `Migrations.migration run up`.
+* Create the 2nd _Migration_ script.
+* Modify the Model(s) to match that script.
+* Test.
+* Reset test data (`Migrations.migration run reset`, or simply drop and create the database)
+* Perform a `Migrations.migration run up`, and _BAM_!
+
+At that point, the 1st _Migrations_ script does not match my modified Model(s).
+
+Here is the required step for Git: `git stash save "For my second Migrations script"`.
+
+Then repeat, rinse, repeat these steps:
+
+* Reset test data (`Migrations.migration run reset`, or simply drop and create the database)
+* `git reset --hard HEAD`
+* Perform a `Migrations.migration run up`
+* `git stash apply`
+* Perform a `Migrations.migration run up`
+* Test
+
+Simple rule: *For every changeset, the _Migrations_ script and the Model(s) must match.*
+
+[Back to top](#lessons-learned)
+
+## Associations Retrieved In A Single Query (Even Distant Ones)
+
+These associations are retrieved in a single query: `hasOne` and `belongsTo`.
+
+For the impatiently expert, the **distant association** example below is `Department`.
+
+See commit 3b6740a2b3. Model `Note`'s associations:
+
+    public $belongsTo = array(
+            'User' => array(
+                    'className' => 'User',
+                    'foreignKey' => 'user_id',
+                    'conditions' => '',
+                    'fields' => '',
+                    'order' => ''
+            ),
+            // Example of a distant relation rolled into original single query.
+            'Department' => array(
+                    'className' => 'Department',
+                    'foreignKey' => false,
+                    // The aliases here refer to association names above this line.
+                    'conditions' => array('User.department_id = Department.id'),
+                    'fields' => '',
+                    'order' => ''
+            ),
+            'NoteFolder' => array(
+                    'className' => 'NoteFolder',
+                    'foreignKey' => 'note_folder_id',
+                    'conditions' => '',
+                    'fields' => '',
+                    'order' => ''
+            )
+    );
+
+    public $hasOne = array(
+            'Aco' => array(
+                    'className' => 'Aco',
+                    'foreignKey' => 'foreign_key',
+                    'conditions' => array('Aco.model' => 'Note'),
+                    'fields' => '',
+                    'order' => ''
+            )
+    );
+
+In raw SQL, the above forms this query (just the association part):
+
+    FROM `notes` AS `Note`
+         LEFT JOIN `users` AS `User` ON (`Note`.`user_id` = `User`.`id`)
+         LEFT JOIN `departments` AS `Department` ON (`User`.`department_id` = `Department`.`id`)
+         LEFT JOIN `note_folders` AS `NoteFolder` ON (`Note`.`note_folder_id` = `NoteFolder`.`id`)
+         LEFT JOIN `acos` AS `Aco` ON (`Aco`.`foreign_key` = `Note`.`id` AND `Aco`.`model` = 'Note')
+
+Particularly note **how to include a distant relation** (`Note` -> `User` -> `Department`) in the above association.
+
+[Back to top](#lessons-learned)
 
 # CakePHP Schema Definition Language
+
+* [Overview and Example](#overview-and-example)
+* [Table Attributes](#table-attributes)
+* [Field Attributes](#field-attributes)
+    * [`'type'`](#field-attribute-type)
+    * [`'length'`](#field-attribute-length)
+    * [`'null'`](#field-attribute-null)
+    * [`'default'`](#field-attribute-default)
+    * [`'key'`](#field-attribute-key)
+
+[Back to top](#table-of-contents)
 
 ## Overview and Example:
 
@@ -67,6 +228,8 @@ Special mention:
 * Primary keys of types `integer` and `biginteger` are translated as `NOT NULL` and `AUTO_INCREMENT` in SQL.
 * Indexes should never be used to define primary key constraints; the primary key column itself defines this just fine.
 
+[Back to top](#cakephp-schema-definition-language)
+
 ## Table Attributes
 
 About the only useful construct here is:
@@ -98,6 +261,8 @@ Details. TL;DR...
         * '`charset`': utf8
         * '`collate`': utf8_unicode_ci
         * '`engine`' : INNODB
+
+[Back to top](#cakephp-schema-definition-language)
 
 ## Field Attributes
 
@@ -216,3 +381,5 @@ When defined, it is a shortcut for a table index definition like this:
             'unique' => 1))
 
 **Don't bother looking up _table's `indexes` definition for primary key constraint_ because this is the better/best practice for defining a _primary key constraint_.**
+
+[Back to top](#cakephp-schema-definition-language)
