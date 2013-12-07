@@ -61,7 +61,9 @@ _I started out unconsciously trying to write a textbook on CakePHP_ to showcase 
 
 But how's that possible? How can I know what lessons to create scenarios for? Well, most of these _"lessons"_ were _"learned"_ before I even started building this app: I read the CakePHP source code like an open book.
 
-And to my potential employer (the one I'm desperately trying to impress now!), my forgetting CakePHP internals in my first interview was because I didn't _study_ for the CakePHP interview. I thought it would be an _open book test_. I learned the definition of _"homework"_ that day: homework is to be _done_, not merely to be mentioned as a _possibility_.
+And to my potential employer (the one I'm desperately trying to impress now!), my forgetting CakePHP internals in my first interview was because I didn't _study_ for the CakePHP interview. I thought it would be an _open book test_.  
+I learned the definition of _"homework"_ that day: homework is to be _done_, not merely to be mentioned as a _possibility_.  
+(I am actually [a diligent person](#i-am-very-diligent-really); I do my homework, usually.)
 
 No, I am not particularly susceptible to scope-creep, nor do I particularly love writing textbooks. You gotta understand the _power and draw_ this potential employer has on me, so you'll know my psychotic desperation to avoid doing homework that is seen as below their standards. Writing a textbook on CakePHP would definitely have earned me a place with that employer, but that was not humanly possible in a short time! I can read source codes like an open book; I cannot write books in an instant.  
 (To me: repeat after myself... _"I am mere mortal, I cannot fly, stop watching DC Comics movies"_)
@@ -383,3 +385,13 @@ When defined, it is a shortcut for a table index definition like this:
 **Don't bother looking up _table's `indexes` definition for primary key constraint_ because this is the better/best practice for defining a _primary key constraint_.**
 
 [Back to top](#cakephp-schema-definition-language)
+
+# Some Footnotes.
+
+### I Am Very Diligent, Really
+
+I was really tied up handling a ball of mess for a previous employer; he got me by saying _"we might not last out this year, please help"_. So much so that I missed the chance to study up (refresh) for an important CakePHP test.
+
+Hence, to all future co-founders/partners I may join: Let's ask each other the tough questions upfront. It's not good to waste our time cleaning up outdated messes, especially when the original creator is hell-bent on creating more of the same.
+
+I also dedicate my open-source profile to all Singaporean employers similar with that previous employer. I did promise to continue teaching him via my open-source profile. It's a big pond out there. Lots to learn, if you'll just relax and enjoy the intellectual beating you'll get from the cream of the crop. I pass the lessons from my own intellectual beatings/defeats to my fellow Singaporeans.
