@@ -125,7 +125,7 @@ Simple rule: *For every changeset, the _Migrations_ script and the Model(s) must
 
 ## Associations Retrieved In A Single Query (Even Distant Ones)
 
-These associations are retrieved in a single query: `hasOne` and `belongsTo`.
+These associations are retrieved in a single query: `belongsTo` and `hasOne` (joined in that order).
 
 For the impatiently expert, the **distant association** example below is `Department`.
 
@@ -135,9 +135,6 @@ See commit 3b6740a2b3. Model `Note`'s associations:
             'User' => array(
                     'className' => 'User',
                     'foreignKey' => 'user_id',
-                    'conditions' => '',
-                    'fields' => '',
-                    'order' => ''
             ),
             // Example of a distant relation rolled into original single query.
             'Department' => array(
@@ -145,15 +142,10 @@ See commit 3b6740a2b3. Model `Note`'s associations:
                     'foreignKey' => false,
                     // The aliases here refer to association names above this line.
                     'conditions' => array('User.department_id = Department.id'),
-                    'fields' => '',
-                    'order' => ''
             ),
             'NoteFolder' => array(
                     'className' => 'NoteFolder',
                     'foreignKey' => 'note_folder_id',
-                    'conditions' => '',
-                    'fields' => '',
-                    'order' => ''
             )
     );
 
@@ -162,8 +154,6 @@ See commit 3b6740a2b3. Model `Note`'s associations:
                     'className' => 'Aco',
                     'foreignKey' => 'foreign_key',
                     'conditions' => array('Aco.model' => 'Note'),
-                    'fields' => '',
-                    'order' => ''
             )
     );
 
@@ -176,6 +166,29 @@ In raw SQL, the above forms this query (just the association part):
          LEFT JOIN `acos` AS `Aco` ON (`Aco`.`foreign_key` = `Note`.`id` AND `Aco`.`model` = 'Note')
 
 Particularly note **how to include a distant relation** (`Note` -> `User` -> `Department`) in the above association.
+
+### Proposed Improvement
+
+Add key `'through'`; keep key `'conditions'` clean and reserved for truly out of the ordinary cases:
+
+    public $belongsTo = array(
+            'User' => array(
+                    'className' => 'User',
+                    'foreignKey' => 'user_id',
+            ),
+            // Example of a distant relation rolled into original single query.
+
+            'Department' => array(
+                    'className' => 'Department',
+                    'foreignKey' => false,
+                    // The alias here refers to association names above this line.
+                    'through' => 'User'
+            ),
+    );
+
+And the same for `hasOne` associations.
+
+See [proposed patch at here](https://github.com/cakephp/cakephp/pull/2452).
 
 [Back to top](#lessons-learned)
 
