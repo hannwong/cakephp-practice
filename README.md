@@ -332,7 +332,7 @@ Add key `'through'`; keep key `'conditions'` clean and reserved for truly out of
 
             'Department' => array(
                     'className' => 'Department',
-                    'foreignKey' => false,
+                    'foreignKey' => 'deparment_id',
                     // The alias here refers to association names above this line.
                     'through' => 'User'
             ),
