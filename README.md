@@ -4,6 +4,12 @@
 * [Deploying My Codes](#deploying-my-codes)
 * [Plugins Needed](#plugins-needed)
 * [Lessons Learned](#lessons-learned)
+    * [Coding Standards](#coding-standards)
+        * [How to Enforce Coding Standards?](#how-to-enforce-coding-standards)
+        * [What Coding Standards Should I Use?](#what-coding-standards-should-i-use)
+        * [_Spaces_ or _Tabs_?](#spaces-or-tabs)
+        * [Why Some Projects Still Use _Tabs_](#why-some-projects-still-use-tabs)
+        * [Rule Number One: Follow The Project's Coding Standards](#rule-number-one-follow-the-projects-coding-standards)
     * [Using Migrations Plugin with SCM](#using-migrations-plugin-with-scm)
     * [Associations Retrieved In A Single Query (Even Distant Ones)](#associations-retrieved-in-a-single-query-even-distant-ones)
 * [CakePHP Schema Definition Language](#cakephp-schema-definition-language)
@@ -15,6 +21,7 @@
         * [`'null'`](#field-attribute-null)
         * [`'default'`](#field-attribute-default)
         * [`'key'`](#field-attribute-key)
+* [Candidate's Log](#candidates-log)
 
 # Practicing CakePHP
 
@@ -32,7 +39,7 @@ Unpack into your CakePHP's `app` folder.
 
 # Plugins Needed
 
-Place these in your CakePHP's `plugins` folder (not in your `app/Plugin`):
+Place these in your `app/plugins` folder:
 
 * [Migrations](https://github.com/CakeDC/migrations) (CakePHP way to define database schemas. _"Look Ma! No SQL!"_)
 * [DebugKit](https://github.com/cakephp/debug_kit) (nice debug and learning tool)
@@ -75,6 +82,151 @@ Big failure. Lesson learned. **I gotta be objective, cool-headed, no matter how 
 * [Associations Retrieved In A Single Query (Even Distant Ones)](#associations-retrieved-in-a-single-query-even-distant-ones)
 
 [Back to top](#table-of-contents)
+
+## Coding Standards
+
+What are coding standards? It's like _grammar rules_. A quick example:
+
+    if (<some condition is true>)
+        Do this;
+    Do that;
+    Do more;
+
+The problem above is the lack of containment of the `if` closure.
+
+**We cannot quickly read the above code and know that `Do that;` and `Do more;` aren't part of the `if` closure.**
+
+Better if:
+
+    if (<some condition is true>) {
+        Do this;
+    }
+    Do that;
+    Do more;
+
+If we do not enforce coding standards, we run the risk of having numerous coding styles in our project. That will produce:
+
+* Poor readability of codes
+* Poor maintainability of project
+* Snowballing inefficiencies in continuing development and enhancements.
+
+That last consequence is what most employers see on the surface. But the fundamental problems are inside the project, not your subsequent waves upon waves of new hires! (Yes, looking at you, my employer during Oct 2013.)
+
+Learn from [my failure](#10-dec-2013-gmt8-0151hrs)!
+
+### How to Enforce Coding Standards?
+
+[PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer).
+
+I'll try to do a tutorial on that.
+
+But for now, the very best example you can study is [CakePHP_CodeSniffer](https://github.com/cakephp/cakephp-codesniffer).
+
+### What Coding Standards Should I Use?
+
+Whatever the open-source project requires. But [the Google Style Guide](https://code.google.com/p/google-styleguide/) is a good template from which to configure your own style.
+
+One point of note for my partners and co-workers is the issue of _Spaces vs Tabs_. ([Google uses Spaces, not Tabs](http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Spaces_vs._Tabs), if that helps you with deciding which quickly)
+
+### _Spaces_ or _Tabs_?
+
+I consider that _spaces_ is more **consistent** than _tabs_. **For everyone working on my projects, I beg you not to use _tabs_.**
+
+Many will say that _spaces are evil_, preferring to use _tabs_ so that different text editors can set different _tab widths_. Some people prefer to see a bigger separation between _indent levels_, and using _tabs_ can let individuals configure their text editor to adjust _indent level separation_.
+
+The following may have a _tab width_ of 4:
+
+    if (<condition is true>) {
+        A statement with another tab in front of it;
+    }
+
+By changing the text editor's _tab width_ to 8, we get:
+
+    if (<condition is true>) {
+            A statement with another tab in front of it;
+    }
+
+_Indent level separation_ may be a matter of preference, but this preference makes for [some very interesting and difficult artifacts](#why-some-projects-still-use-tabs).
+
+If using _spaces_ (rather than _tabs_), whitespaces are represented by _spaces_, never by a combination of _spaces and tabs_.
+
+When using only _tabs_, and the _tab width_ happens to be 8, you are forced to **hang indents at awkward positions**:
+
+    $conn->expects($this->exactly(2))->method('beginTransaction')
+            ->will($this->returnValue(true));
+
+Compared to straightforward _spaces_:
+
+    $conn->expects($this->exactly(2))->method('beginTransaction')
+                                     ->will($this->returnValue(true));
+
+The above is 4 objects:
+
+* `$conn`
+* That returned by `->expects($this->exactly(2))`
+* That returned by `->method('beginTransaction')`
+* That returned by `->will($this->returnValue(true))`
+
+To hang indents, in the above case, at less awkward positions, you'll need one of these 5 combinations:
+
+* 4 tabs, 1 space.
+* 3 tabs, 1 space, 1 tab.
+* And so on...
+
+5 combinations to represent a single visual artifact is one too many mappings. How would you like it if there are exactly 5 ways to spell _"Apple"_: _"Appo"_ (Hong Kong), _"Ahpple"_ (Mexico), _"Apper"_ (Singapore), _"Ahppelr"_ (India), _"Aypel"_ (unknown?).
+
+A more common problem is with function names or invocations:
+
+    return $this->cacheMethod(__FUNCTION__, $cacheKey,
+            $this->startQuote . implode($this->endQuote . '.' . $this->startQuote, $items) . $this->endQuote
+    );
+
+vs
+
+    return
+            $this->cacheMethod(__FUNCTION__, $cacheKey,
+                               $this->startQuote .
+                                 implode($this->endQuote . '.' . $this->startQuote, $items) .
+                                 $this->endQuote
+    );
+
+It's an invocation of function `cacheMethod` with _3 parameters_. The _3rd parameter_ is obviously a long construct whose subordinate lines (4 and 5) are further indented (by 2 spaces) to indicate that those lines are part of the _3rd parameter_. There is lesser chance of seeing 5 parameters by mistake.
+
+The 3 parameters are:
+
+* `__FUNCION__`
+* `$cacheKey`
+* `$this->startQuote . ...`
+
+As can be seen, using _tabs_ either produces awkward hanging indents, or requires a mix of _spaces_ and _tabs_ to make said indents less awkward.
+
+### Why Some Projects Still Use _Tabs_
+
+There may be many valid reasons for doing so. But these reasons are mostly beyond me (I'm not the expert you can ask). And I can only barely understand one.
+
+The foremost reason most quoted seems to be: _the ability to adjust **indent level separation**_. However, **allowing _indent level separation_ to be adjusted** makes for a particular mess that cannot currently be solved (at least by me).
+
+Say we have a combination of 4 tabs (8-wide each) and 1 space to achieve something neat like this:
+
+    $conn->expects($this->exactly(2))->method('beginTransaction')
+                                     ->will($this->returnValue(true));
+
+An audience preferring an _indent level separation_ of 2-wide will see this:
+
+    $conn->expects($this->exactly(2))->method('beginTransaction')
+             ->will($this->returnValue(true));
+
+It can be to cater for a majority of audiences who have text editors that _cannot insert spaces upon pressing the tab key_. But most modern text editors mostly do (including the very popular [Eclipse](http://mcuoneclipse.com/2012/09/14/spaces-vs-tabs-in-eclipse/)).
+
+### Rule Number One: Follow The Project's Coding Standards
+
+Some projects, like CakePHP, use _tabs_. **You must follow the coding standard of the project!**
+
+If you do not, then that project's coding style will become inconsistent, difficult to read, hard to maintain. You'll be breaking _efficient continuity_ in that project!
+
+(_NB: CakePHP uses tabs. Although uncommon in open-source projects, it is still valid. Any **consistent** coding style is a valid style, as long as it makes codes reasonably readable._)
+
+[Back to top](#lessons-learned)
 
 ## Using Migrations Plugin with SCM
 
@@ -408,3 +560,21 @@ I was really tied up handling a ball of mess for a previous employer; he got me 
 Hence, to all future co-founders/partners I may join: Let's ask each other the tough questions upfront. It's not good to waste our time cleaning up outdated messes, especially when the original creator is hell-bent on creating more of the same.
 
 I also dedicate my open-source profile to all Singaporean employers similar with that previous employer. I did promise to continue teaching him via my open-source profile. It's a big pond out there. Lots to learn, if you'll just relax and enjoy the intellectual beating you'll get from the cream of the crop. I pass the lessons from my own intellectual beatings/defeats to my fellow Singaporeans.
+
+# Candidate's Log
+
+This section details my journey towards getting acceptance into a top open-source community.
+
+Actually, more like my failures, which will serve as lessons for myself and all employers. :-)
+
+If you think that watching movies with success stories are entertaining, wait till you look at my spectacular failures.
+
+Enjoy!
+
+## 10 Dec, 2013 GMT+8 0151hrs:
+
+Failed! Community rejected me on coding standards.
+
+See [Coding Standards](#coding-standards).
+
+This is getting exciting!
